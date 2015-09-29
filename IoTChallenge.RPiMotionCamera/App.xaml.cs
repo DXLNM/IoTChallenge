@@ -7,6 +7,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Networking.Connectivity;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -15,7 +16,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-namespace IoTChallenge.Universal
+namespace IoTChallenge.RPiMotionCamera
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
@@ -100,6 +101,19 @@ namespace IoTChallenge.Universal
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        public static bool ConnectedToInternet()
+        {
+            ConnectionProfile InternetConnectionProfile = NetworkInformation.GetInternetConnectionProfile();
+
+            if (InternetConnectionProfile == null)
+            {
+                return false;
+            }
+
+            var level = InternetConnectionProfile.GetNetworkConnectivityLevel();
+            return level == NetworkConnectivityLevel.InternetAccess;
         }
     }
 }
