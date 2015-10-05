@@ -39,7 +39,7 @@ namespace IoTChallenge.RPiMotionCamera
         private StorageFile photoFile;
         private string PHOTO_FILE_NAME;
         private bool isPreviewing;
-        private bool isRecording;
+        private bool isCapturing;
         BitmapImage bitmap;
         private string photoFilePath;
         private readonly IFaceServiceClient faceServiceClient = new FaceServiceClient("628db5c61a9644f293a2015159ce8d53");
@@ -53,6 +53,7 @@ namespace IoTChallenge.RPiMotionCamera
         {
             this.InitializeComponent();
             isPreviewing = false;
+            isCapturing = false;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -77,7 +78,10 @@ namespace IoTChallenge.RPiMotionCamera
             {
                 //takePicture and call oxford service;
                 Debug.WriteLine("Movement Detected");
-
+                if (!isCapturing)
+                {
+                    capturePicture();
+                }
             }
 
 
@@ -99,11 +103,6 @@ namespace IoTChallenge.RPiMotionCamera
                     {
                         await mediaCapture.StopPreviewAsync();
                         isPreviewing = false;
-                    }
-                    if (isRecording)
-                    {
-                        await mediaCapture.StopRecordAsync();
-                        isRecording = false;
                     }
                     mediaCapture.Dispose();
                     mediaCapture = null;
@@ -154,6 +153,7 @@ namespace IoTChallenge.RPiMotionCamera
         {
             try
             {
+                isCapturing = true;
                 PHOTO_FILE_NAME = "LNM_Demo_" + (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds + ".jpg";
                 captureImage.Source = null;
 
@@ -204,19 +204,23 @@ namespace IoTChallenge.RPiMotionCamera
                             });
                         }
 
-                        CameraSensorDocument document = await documentDBUtilities.getCameraDocument("bBNBAPFVBgAMAAAAAAAAAA==");
-                        foreach (var item in document.id)
-                        {
-                            Debug.WriteLine(document.id);
-                            Debug.WriteLine(document.description);
-                            Debug.WriteLine(document.kiosk);
-                            Debug.WriteLine(document.product);
-                            Debug.WriteLine(document.unitPrice);
-                            Debug.WriteLine(document.visits[0].ageOfPerson);
-                        }
+                        //The below code is to call the documentDB database, download the json and parse it.
+
+                        //CameraSensorDocument document = await documentDBUtilities.getCameraDocument("bBNBAPFVBgAMAAAAAAAAAA==");
+                        //foreach (var item in document.id)
+                        //{
+                        //    Debug.WriteLine(document.id);
+                        //    Debug.WriteLine(document.description);
+                        //    Debug.WriteLine(document.kiosk);
+                        //    Debug.WriteLine(document.product);
+                        //    Debug.WriteLine(document.unitPrice);
+                        //    Debug.WriteLine(document.visits[0].ageOfPerson);
+                        //}
+
                         //document.visits.Add(new Visit {ageOfPerson=69, date=DateTime.Now, gender="Male" });
                         //await documentDBUtilities.updateCameraDocument("bBNBAPFVBgAMAAAAAAAAAA==", document);
 
+                        isCapturing = false;
                     }
                     catch (ClientException ex)
                     {
