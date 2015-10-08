@@ -59,7 +59,7 @@ namespace IoTChallenge.RPiMotionCamera
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             initializeCamera();
-            //InitGPIO();   //Uncomment this line if you are debugging/deploying on the RPi2 
+            InitGPIO();   //Uncomment this line if you are debugging/deploying on the RPi2 
         }
 
         private void InitGPIO()
@@ -70,7 +70,7 @@ namespace IoTChallenge.RPiMotionCamera
             _pinMotion.ValueChanged += _pinMotion_ValueChanged;
         }
 
-        private void _pinMotion_ValueChanged(GpioPin sender,
+        private async void _pinMotion_ValueChanged(GpioPin sender,
            GpioPinValueChangedEventArgs args)
         {
             var isOn = args.Edge == GpioPinEdge.FallingEdge;
@@ -80,7 +80,13 @@ namespace IoTChallenge.RPiMotionCamera
                 Debug.WriteLine("Movement Detected");
                 if (!isCapturing)
                 {
-                    capturePicture();
+                    //capturePicture();
+                    //initializeCamera();
+                    await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                            () =>
+                            {
+                                capturePicture();
+                            });
                 }
             }
 
@@ -126,6 +132,7 @@ namespace IoTChallenge.RPiMotionCamera
             }
             catch (Exception ex)
             {
+                Debug.WriteLine(ex.Message);
                 status.Text = "Unable to initialize camera for audio/video mode: " + ex.Message;
             }
         }
